@@ -1,0 +1,986 @@
+#!/usr/bin/env bash
+#title           : gen _simple_store
+#description     : This script will generate a Ruby On Rails Project
+#author          : L. E. Drake
+#date            : 2015.05.09
+#version         : 0.0.0
+#usage           : ./gen_simple_store [api]
+#bash_version    : GNU bash, version 4.3.11(1)-release (x86_64-pc-linux-gnu)
+#notes           : This script is developed to document & create a Rails
+#                  skeleton
+#
+#                  Do a find for the string "-- Driver Code --" in this file to
+#                  get to the Main line code or simply got to the EOF and scroll
+#                  back up until you see "-- Driver Code --".
+#
+#                  lsb_release -a
+#                  Distributor ID: Ubuntu
+#                  Description:  Ubuntu 14.04.2 LTS
+#                  Release:  14.04
+#                  Codename: trusty
+#
+#                  sed --version
+#                  sed (GNU sed) 4.2.2
+#                  Copyright (C) 2012 Free Software Foundation, Inc.
+#
+#                  awk --version
+#                  GNU Awk 4.0.1
+#                  Copyright (C) 1989, 1991-2012 Free Software Foundation.
+#
+# -------------------- Functions --------------------
+. ../lib/CommonMethods.bsh
+. ../lib/GitMethods.bsh
+
+function cp_genesis_files() {
+  local me=`basename "$0"`
+  mkdir -p genesis/lib genesis/$BASE_PROJECT_NAME
+  cp ../genesis/lib/CommonMethods.bsh genesis/lib/
+  cp ../genesis/lib/GitMethods.bsh genesis/lib/
+  cp ../genesis/$BASE_PROJECT_NAME/$me genesis/$BASE_PROJECT_NAME/
+}
+
+function disable_Spring_in_gemfile() {
+  local fn="Gemfile"
+  local find_text="resources :products"
+  local m="Disable Spring in the Gemfile"
+  local replacement_text="# gem 'spring'"
+
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+}
+
+function add_root_route() {
+  local fn="config/routes.rb"
+  local find_text="^\  resources :products"
+  local insert_text="\  root to: 'products#index'"
+  local m="Set root route"
+
+  msg "$m"
+
+  sed -i "/$find_text/a $insert_text" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function create_seeds_file() {
+  local fn="db/seeds.rb"
+  local m="Create Seeds file"
+
+  msg "$m"
+  touch "$fn"
+  echo -e "" >> $fn
+  echo -e "electronics = Category.create!(name: \"Electronics\")" >> $fn
+  echo -e "toys = Category.create!(name: \"Toys & Games\")" >> $fn
+  echo -e "clothes = Category.create!(name: \"Clothes\")" >> $fn
+  echo -e "furniture = Category.create!(name: \"Furniture\")" >> $fn
+  echo -e "foods = Category.create!(name: \"Foods\")\n" >> $fn
+
+  echo -e "Product.create!(name: \"Building Blocks\", price: 54.95, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Red Shirt\", price: 12.49, released_on: rand(1..90).days.ago, category: clothes)" >> $fn
+  echo -e "Product.create!(name: \"Oak Coffee Table\", price: 223.99, released_on: rand(1..90).days.ago, category: furniture)" >> $fn
+  echo -e "Product.create!(name: \"Operation\", price: 17.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Oh's Cereal\", price: 3.95, released_on: rand(1..90).days.ago, category: foods)" >> $fn
+  echo -e "Product.create!(name: \"Game Console\", price: 299.95, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Video Game\", price: 29.95, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Laurence Chair\", price: 34.99, released_on: rand(1..90).days.ago, category: furniture)" >> $fn
+  echo -e "Product.create!(name: \"Dog Toy Bone\", price: 2.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Heated Blanket\", price: 27.95, released_on: rand(1..90).days.ago, category: furniture)" >> $fn
+  echo -e "Product.create!(name: \"Flux Capacitor\", price: 19.55, released_on: rand(1..90).days.ago, category: electronics)" >> $fn
+  echo -e "Product.create!(name: \"Chocolate Pie\", price: 3.14, released_on: rand(1..90).days.ago, category: foods)" >> $fn
+  echo -e "Product.create!(name: \"Acoustic Guitar\", price: 1025.00, released_on: rand(1..90).days.ago, category: electronics)" >> $fn
+  echo -e "Product.create!(name: \"Scramble Board game\", price: 15.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Would You Rather\", price: 17.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Battle of the Sexes\", price: 14.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Backgammon\", price: 108.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Millennium Falcon\", price: 4999340.00, released_on: rand(1..90).days.ago, category: electronics)" >> $fn
+  echo -e "Product.create!(name: \"Answer to Everything\", price: 42.00, released_on: rand(1..90).days.ago, category: electronics)" >> $fn
+  echo -e "Product.create!(name: \"Box Kite\", price: 63.00, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"1000 Piece Jigsaw Puzzle\", price: 14.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Drake's Ducky\", price: 24.99, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Unicorn Action Figure\", price: 8.75, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"Rack\", price: 32.49, released_on: rand(1..90).days.ago, category: furniture)" >> $fn
+  echo -e "Product.create!(name: \"Model Train Rails\", price: 45.00, released_on: rand(1..90).days.ago, category: toys)" >> $fn
+  echo -e "Product.create!(name: \"IC Core 2\", price: 29.99, released_on: rand(1..90).days.ago, category: electronics)" >> $fn
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function update_application_html_erb() {
+  local fn="app/views/layouts/application.html.erb"
+  local find_text="<head>"
+  local insert_text=""
+  local m1="Indent to show nesting relations"
+  local m="Update application.hrtm.erb"
+  local replacement_text="\  <head>"
+
+  msg "$m"
+
+  # Indent all lines to show the nesting
+
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<title>"
+  replacement_text="\  <title>"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<%= stylesheet_link_tag"
+  replacement_text="\  <%= stylesheet_link_tag"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<%= javascript_include_tag"
+  replacement_text="\  <%= javascript_include_tag"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<%= csrf_meta_tags"
+  replacement_text="\  <%= csrf_meta_tags"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<\/head>"
+  replacement_text="\  <\/head>"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<body>"
+  replacement_text="\  <body>"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<%= yield"
+  replacement_text="\    <%= yield"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<\/body>"
+  replacement_text="\  <\/body>"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  git add -A;git commit -m"$m1";echo ''
+
+  # Add container for Notificeations etc
+  insert_text+="\    <div id=\"container\">\n"
+  insert_text+="\      <% flash.each do |name, msg| %>\n"
+  insert_text+="\        <%= content_tag :div, msg, id: \"flash_#{name}\" %>\n"
+  insert_text+="\      <% end %>"
+
+  find_text="<body>"
+  sed -i "/$find_text/a $insert_text" "$fn"
+
+  find_text="\    <%= yield"
+  replacement_text="\      <%= yield"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="\      <%= yield"
+
+  # Close the open container AKA div
+  insert_text="\    <\/div>"
+  sed -i "/$find_text/a $insert_text" $fn
+
+  # Delete the blank lines
+  sed -i '/^$/d' $fn
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function update_view_prod_index_html_erb () {
+  local fn="app/views/products/index.html.erb"
+  local begin_text=""
+  local end_text=""
+  local find_text=""
+  local insert_text=""
+  local m="Update products/index.html.erb"
+  local replacement_text=""
+
+  msg "$m"
+
+  # Delete lines 1 & 2. 1 - Notice, 2 -Bank
+  sed -i 1,2d "$fn"
+
+  # Give the Table an id of product
+  find_text="<table>"
+  replacement_text="<table id=\"poducts\">"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  # Delete the blank line after be and before link to ...
+  ## sed -i '/$find_text/d' $fn
+  begin_text="^<br>"
+  end_text="^<%= link_to 'New Product'"
+  sed -i "/$begin_text/,/$end_text/{//!d}" "$fn"
+
+  find_text="product.price"
+  replacement_text="number_to_currency product.price"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="product.released_on"
+  replacement_text="product.released_on.strftime(\"%B %e, %Y\")"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="product.category"
+  replacement_text="product.category.name"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function update_view_prod_show_html_erb() {
+  local fn="app/views/products/show.html.erb"
+  local begin_text=""
+  local end_text=""
+  local find_text=""
+  local insert_text=""
+  local m="Update products/show.html.erb"
+  local replacement_text=""
+
+  msg "$m"
+
+  # Delete lines 1 & 2. 1 - Notice, 2 -Bank
+  sed -i 1,2d "$fn"
+
+  find_text="@product.released_on"
+  replacement_text="@product.released_on.strftime(\"%B %e, %Y\")"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="@product.category"
+  replacement_text="@product.category.name"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function update_view_prod__form_html_erb() {
+  local fn="app/views/products/_form.html.erb"
+  local begin_text=""
+  local end_text=""
+  local find_text=""
+  local insert_text=""
+  local m="Update products/_form.html.erb"
+  local replacement_text=""
+
+  msg "$m"
+
+  find_text="<div id=\"error_explanation\""
+  replacement_text="<div class=\"error_messages\""
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  find_text="<%= f.text_field :category_id %>"
+  replacement_text="<%= f.collection_select :category_id, Category.all, :id, :name %>"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function create_layout_file() {
+  local fn="app/assets/stylesheets/layout.css.scss"
+
+  echo -e "html, body {" >> "$fn"
+  echo -e "background-color: #3B0B2E;" >> "$fn"
+  echo -e "font-family: Verdana, Helvetica, Arial;" >> "$fn"
+  echo -e "font-size: 14px;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "a img {" >> "$fn"
+  echo -e "border: none;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "a {" >> "$fn"
+  echo -e "color: #0000FF;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e ".clear {" >> "$fn"
+  echo -e "  clear: both;" >> "$fn"
+  echo -e "  height: 0;" >> "$fn"
+  echo -e "  overflow: hidden;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "#container {" >> "$fn"
+  echo -e "  echo -e "  background-color: #FFF;" >> "$fn"
+  echo -e "  padding: 20px 40px;" >> "$fn"
+  echo -e "  margin-top: 20px;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "#flash_notice, #flash_error, #flash_alert {" >> "$fn"
+  echo -e "  padding: 5px 8px;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "#flash_notice {" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "#flash_error, #flash_alert {" >> "$fn"
+  echo -e "  background-color: #FCC;" >> "$fn"
+  echo -e "  border: solid 1px #C66;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e ".field_with_errors {" >> "$fn"
+  echo -e "  display: inline;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e ".error_messages {" >> "$fn"
+  echo -e "  width: 400px;" >> "$fn"
+  echo -e "  border: 2px solid #CF0000;" >> "$fn"
+  echo -e "  padding: 0px;" >> "$fn"
+  echo -e "  padding-bottom: 12px;" >> "$fn"
+  echo -e "  margin-bottom: 20px;" >> "$fn"
+  echo -e "  background-color: #f0f0f0;" >> "$fn"
+  echo -e "  font-size: 12px;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e ".error_messages h2 {" >> "$fn"
+  echo -e "  text-align: left;" >> "$fn"
+  echo -e "  font-weight: bold;" >> "$fn"
+  echo -e "  padding: 5px 10px;" >> "$fn"
+  echo -e "  font-size: 12px;" >> "$fn"
+  echo -e "  margin: 0;" >> "$fn"
+  echo -e "  background-color: #c00;" >> "$fn"
+  echo -e "  color: #fff;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e ".error_messages p {" >> "$fn"
+  echo -e "  margin: 8px 10px;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e ".error_messages ul {" >> "$fn"
+  echo -e "  margin-bottom: 0;" >> "$fn"
+  echo -e "}" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "form .field, form .actions {" >> "$fn"
+  echo -e "  margin: 12px 0;" >> "$fn"
+  echo -e "}" >> "$fn"
+}
+
+function add_simple_styling() {
+  local fn="app/assets/stylesheets/products.css.scss"
+  local fn0="app/assets/stylesheets/products.scss"
+  local find_text=""
+  local insert_text=""
+  local m1="Rename products.scss to products.css.scss"
+  local m="Add simple styling"
+
+  msg "$m"
+
+  fn="app/assets/stylesheets/products.css.scss"
+  fn0="app/assets/stylesheets/products.scss"
+  m1="Rename products.scss to products.css.scss"
+
+  msg "$m1"
+  mv "$fn0" "$fn"
+  git add -A;git commit -m"$m1";echo ''
+
+  echo -e "\n#products {" >> $fn
+  echo -e "  th {" >> $fn
+  echo -e "    text-align: left;" >> $fn
+  echo -e "  }" >> $fn
+  echo -e "  td, th {" >> $fn
+  echo -e "    padding: 2px 15px;" >> $fn
+  echo -e "    padding-left: 0;" >> $fn
+  echo -e "  }" >> $fn
+  echo -e "}" >> $fn
+
+  m1="Flip the order of require_tree and require_self"
+  msg "$m1"
+  fn="app/assets/stylesheets/application.css"
+  find_text="require_self"
+  sed -i "/$find_text/d" $fn
+
+  insert_text="\ *= require_self"
+  find_text="*= require_tree ."
+  sed -i "/$find_text/i $insert_text" "$fn"
+
+  create_layout_file
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function  create_namespace_api_in_routes() {
+  local fn="config/routes.rb"
+  local find_text="^\  resources :products"
+  local insert_text="\  namespace :api do\n\  end\n"
+  local m="Create Name Space API in Routes file"
+
+  msg "$m"
+  sed -i "/$find_text/i $insert_text" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function  create_namespace_v1_inside_namespace_api() {
+  local fn="config/routes.rb"
+  local find_text="namespace :api do"
+  local insert_text="\    namespace :v1 do\n\    end"
+  local m="Create_Name Space v1 Inside Name Space API in Routes file"
+
+  msg "$m"
+  sed -i "/$find_text/a $insert_text" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function add_product_resources_inside_namespace_v1() {
+  local fn="config/routes.rb"
+  local find_text="namespace :v1 do"
+  local insert_text="\      resources :products"
+  local m="Add Product Resources inside of Name Space V1"
+
+  msg "$m"
+  sed -i "/$find_text/a $insert_text" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function create_api_v1_products_controller() {
+  local fn="app/controllers/api/v1/products_controller.rb"
+  local m="create_api_v1_products_controller"
+
+  msg "$m"
+
+  touch "$fn"
+
+  echo -e "module Api" >> "$fn"
+  echo -e "  module V1" >> "$fn"
+  echo -e "    class ProductsController < ApplicationController" >> "$fn"
+  echo -e "      respond_to :json" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "      def index" >> "$fn"
+  echo -e "        respond_with Product.all" >> "$fn"
+  echo -e "      end" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "      def show" >> "$fn"
+  echo -e "        respond_with Product.find(params[:id])" >> "$fn"
+  echo -e "      end" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "      def create" >> "$fn"
+  echo -e "        respond_with Product.create(params[:product])" >> "$fn"
+  echo -e "      end" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "      def update" >> "$fn"
+  echo -e "        respond_with Product.update(params[:id], params[:products])" >> "$fn"
+  echo -e "      end" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "      def destroy" >> "$fn"
+  echo -e "        respond_with Product.destroy(params[:id])" >> "$fn"
+  echo -e "      end" >> "$fn"
+  echo -e "    end" >> "$fn"
+  echo -e "  end" >> "$fn"
+  echo -e "end" >> "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function add_responders_gem() {
+  local fn="Gemfile"
+  local find_text="^group :development, :test do"
+  local insert_text="gem 'responders', '~> 2.1.0'\n"
+  local m="Add Responders Gem to Gemfile (req. in Rails 4.2+)"
+
+  msg "$m"
+  sed -i "/$find_text/i $insert_text" "$fn"
+
+  bundle install
+  rails g responders:install
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function build_api() {
+  create_namespace_api_in_routes
+  create_namespace_v1_inside_namespace_api
+  add_product_resources_inside_namespace_v1
+
+  mkdir -p app/controllers/api/v1
+
+  create_api_v1_products_controller
+  add_responders_gem
+}
+
+function up_date_migration_file() {
+  local fn=$1
+  local find_text="def change"
+  local insert_text="\    rename_column :products, :released_on, :released_at\n"
+        insert_text+="\    change_column :products, :released_at, :datetime"
+
+  sed -i "/$find_text/a $insert_text" "$fn"
+}
+
+function create_migration_change_field_name() {
+  local fn=''
+  local arr=''
+  local i=''
+  local m="Create Migration Rename released_on to released_at"
+  local migration_name=''
+  local output=''
+
+  msg "$m"
+
+  # Create the migration file, capture the actual name in fn
+  migration_name="ChangeProductColNameReleased_onToReleased_at"
+  output=$(rails g migration $migration_name  2>&1 | tee /dev/tty)
+  arr=( $output )
+
+  for i in "${arr[@]}"
+  do
+    if [ "${i:0:2}" == "db" ]
+    then
+      fn="$i"
+      break
+    fi
+  done
+
+  up_date_migration_file "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function update_v1_products_controller() {
+  local fn="app/controllers/api/v1/products_controller.rb"
+  local find_text='respond_to :json'
+  local insert_text=''
+  local m="Update v1 api Products Controller"
+
+  msg "$m"
+
+  insert_text+="\      # The field \"released_on\" is deprecated\n"
+  insert_text+="\      class Product < ::Product\n"
+  insert_text+="\        def as_json(options = {})\n"
+  insert_text+="\          super.merge(released_on: released_at.to_date)\n"
+  insert_text+="\        end\n"
+  insert_text+="\      end\n"
+
+  sed -i "/$find_text/i $insert_text" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function fix_the_ui_code() {
+  local fn="app/views/products/index.html.erb"
+  local arr=''
+  local find_text=''
+  local m="Update UI to use 'released_at'"
+  local replacement_text=''
+
+  msg "$m"
+
+  find_text='product.released_on'
+  replacement_text='product.released_at'
+  arr=( "index.html.erb" "show.html.erb" )
+  for i in "${arr[@]}"
+  do
+    fn="app/views/products/"$i
+    sed -i "s/$find_text/$replacement_text/g" "$fn"
+  done
+
+  fn="app/views/products/_form.html.erb"
+  find_text='released_on'
+  replacement_text='released_at'
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  fn="app/controllers/products_controller.rb"
+  find_text='released_on'
+  replacement_text='released_at'
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function add_v2_to_routes() {
+  local fn="config/routes.rb"
+  local find_text="namespace :v1 do"
+  local insert_text=""
+  local m="Add API V2 to Routes"
+
+  msg "$m"
+
+  insert_text="\    namespace :v2 do\n"
+  insert_text+="\      resources :products\n"
+  insert_text+="\    end"
+
+  # Get line number for the match.  We know  because we created this
+  # that we need to move down 3 lines  form the match and then insert.
+  # there is probably a better way to do this but it works for now!
+  x=$(grep -n "$find_text" "$fn"| sed -n 's/^\([0-9]*\)[:].*/\1/p')
+  let "x+=3"
+  sed -i "${x}i$insert_text" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function update_v2_products_controller() {
+  local fn="app/controllers/api/v2/products_controller.rb"
+  local find_text="module V1"
+  local m="Update V2 Products Controller"
+  local replacement_text="module V2"
+
+  # chg V1 to V2
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  # find "# "The field "" & delete the next 6 lines including "# The field "
+  find_text="# The field "
+  x=$(grep -n "$find_text" "$fn"| sed -n 's/^\([0-9]*\)[:].*/\1/p')
+  n=$((x + 6))
+  sed -i "${x},${n}d" "$fn"
+
+  msg "$m"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function build_api_v2() {
+  # Story: Need to change the name and type of the table field released_on
+  # to released_at.  released_on is type date released_at is type datetime.
+  # Also the change must not break the original api.  The released_on will
+  # be depricated and the api destroyed at a future time.
+  #
+  # "That is the mission should you choose to accept it."
+
+  create_migration_change_field_name
+  update_v1_products_controller
+  fix_the_ui_code
+
+  rake db:migrate
+  rake db:test:prepare
+
+  cp -R app/controllers/api/v1 app/controllers/api/v2
+
+  add_v2_to_routes
+  update_v2_products_controller
+}
+
+function cleanup_routes_file() {
+  local fn="config/routes.rb"
+  local beginning_text="^  root to: 'products#index'"
+  local ending_text='^end'
+  local m="Remove all lines between root .. end"
+
+  msg "$m"
+  # Delete lines between the 2 patterns
+  sed -i "/${beginning_text}/,/${ending_text}/{//p;d;}" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function replace_namespace_with_scope() {
+  local fn="config/routes.rb"
+  local arr=""
+  local find_text=""
+  local m="Replace NameSpaces with call to Scopes"
+  local replacement_text=""
+  local ver=1
+
+  msg "$m"
+
+  find_text="namespace :api do"
+  replacement_text="namespace :api, defaults: {format: 'json'} do"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  arr=( 1 2 )
+  for i in "${arr[@]}"
+  do
+    find_text="namespace :v${i} do"
+    replacement_text="scope module: :v${i}, constraints: ApiConstraints.new(version: ${i}) do"
+    sed -i "s/$find_text/$replacement_text/g" "$fn"
+  done
+
+  # Set default api version
+  ver=2
+  find_text="ApiConstraints.new(version: ${ver})"
+  replacement_text="ApiConstraints.new(version: ${ver}, default: true)"
+  sed -i "s/$find_text/$replacement_text/g" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function define_api_constraints_class() {
+  local fn="lib/api_constraints.rb"
+  local m="Define API Constraints Class"
+
+  msg "$m"
+
+  touch "$fn"
+  echo -e "class ApiConstraints" >> "$fn"
+  echo -e "  def initialize(options)" >> "$fn"
+  echo -e "    @version = options[:version]" >> "$fn"
+  echo -e "    @default = options[:default]" >> "$fn"
+  echo -e "  end" >> "$fn"
+  echo -e "" >> "$fn"
+  echo -e "  def matches?(req)" >> "$fn"
+  echo -e "    @default || req.headers['Accept'].include?(\"application/vnd.example.v#{@version}\")" >> "$fn"
+  echo -e "  end" >> "$fn"
+  echo -e "end" >> "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function add_api_constraints_to_routes_file() {
+  local fn="config/routes.rb"
+  local find_text=".routes.draw do"
+  local insert_text="require 'api_constraints'\n"
+  local m="Add API Constraints to Routes file"
+
+  msg "$m"
+
+  sed -i "/$find_text/i $insert_text" "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+function update_documentation() {
+  local fn="./README.md"
+  local fn1="./README.rdoc"
+  local date=`date +%Y-%m-%d`
+  local find_text=""
+  local insert_text=""
+  local Line_No=0
+  local m="Update README"
+  local me=`basename "$0"`
+
+  msg "$m"
+
+  mv "$fn1" "$fn"
+
+  insert_text=""
+  insert_text+="#<center>Simple Store</center>\n"
+  insert_text+="##<center>(Project: simple_store_api)</center>\n\n"
+  insert_text+="This is a simple example of creating API versioning "
+  insert_text+="with out the use of a gem.  The intent is to show how "
+  insert_text+="API versioning may be implemented in an existing Rails "
+  insert_text+="app with out the use of an API gem.\n\n"
+
+  insert_text+="Here is the idea: You have an existing Rails app.  The "
+  insert_text+="powers that be, have determined that an API needs to be "
+  insert_text+="added to the app.\n\n"
+
+  insert_text+="Now because we are *\"clairvoyant\"* and see the future "
+  insert_text+="we know there is going to be a Schema change after we "
+  insert_text+="deploy to production, which will __not__ be backwards "
+  insert_text+="compatible with the existing API, AKA the API version "
+  insert_text+="in production will be broken, angering untold numbers "
+  insert_text+="of fellow developers :(.\n\n"
+
+  insert_text+="So, now you know the future, your job is: \n\n"
+  insert_text+="1. Add/Create an API on/for the existing application.\n\n"
+  insert_text+="2. Fix the break.\n\n"
+  insert_text+="3. Add/Create a second API utilizing the same data as the first "
+  insert_text+=" version of the API incorporating the Schema Change.\n\n"
+
+  insert_text+="You can review the git log to see how I implemented the changes.\n\n"
+
+  insert_text+="There are a couple of branches you may wish to take note of "
+  insert_text+=" notably build_v2_api and build_version_into_accept_header.  At the "
+  insert_text+="conclusion of build_v2_api the API access looks like the following: \n\n"
+
+  insert_text+="\`\`\`HTML\nhttp://localhost:3000/api/v1/products.json\n"
+  insert_text+="http://localhost:3000/api/v2/products.json\n\`\`\`\n\n"
+
+  insert_text+="At the conclusion of \"build_version_into_accept_header\" "
+  insert_text+="access to the API looks like this:\n\n\`\`\`BASH\n"
+
+  insert_text+="curl -H 'Accept: application/vnd.example.v1' "
+  insert_text+="http://localhost:3000/api/products\n"
+  insert_text+="curl -H 'Accept: application/vnd.example.v2' "
+  insert_text+="http://localhost:3000/api/products\n\`\`\`\n\n"
+
+  insert_text+="If you wish to test this for yourself check "
+  insert_text+="out the branch you desire.\n\n"
+
+  find_text="^ProjectParent"
+  Line_No=$(grep -n "$find_text" "$FQME"| sed -n 's/^\([0-9]*\)[:].*/\1/p')
+
+  insert_text+="A final note.  This project was \"generated\", using Rails "
+  insert_text+="version $RAILS_VERSION and Ruby version $RUBY_VERSION.  Yes "
+  insert_text+="that is correct it was generated from a BASH script!\n\n"
+
+  insert_text+="The \"BASH\" script is in the genesis folder "
+  insert_text+="the script name is __${me}__.  Given that you may want to "
+  insert_text+="have a peek at the generator script I suggest that you "
+  insert_text+="start at line No. ${Line_No} and proceed down from there, "
+  insert_text+="to see the detail instructions/steps.  The individual methods/"
+  insert_text+="functions are all defined before line No. ${Line_No}.\n\n"
+
+  insert_text+="$date\n\n"
+
+  echo -e "$insert_text" > "$fn"
+
+  git add -A;git commit -m"$m";echo ''
+}
+
+# ------------------ Functions End ------------------
+ProjectParent='../../'
+
+
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# ------------------------------- Driver Code --------------------------------
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
+PROJECT_NAME='simple_store'
+RAILS_VERSION='4.2.0'
+RUBY_VERSION='2.2.0'
+NEW_OPTIONS='--skip-bundle -T '
+API_BUILD=false
+
+BASE_PROJECT_NAME=$PROJECT_NAME
+SEQ_NO=0
+
+FQME=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)/`basename "${BASH_SOURCE[0]}"`
+
+# If param #1 is API add on API code
+if [ $# -ge 1 ]
+then
+  shopt -s nocasematch
+  if [[ "$1" == "api" ]]
+  then
+    PROJECT_NAME=$PROJECT_NAME"_api"
+    API_BUILD=true
+  fi
+  shopt -u nocasematch
+fi
+
+GEM_SET_NAME="ruby-$RUBY_VERSION@$PROJECT_NAME"
+
+cd "$ProjectParent"
+
+# Create the base project
+init_project "$PROJECT_NAME" "$RUBY_VERSION" "$RAILS_VERSION" "$NEW_OPTIONS"
+
+cd "$PROJECT_NAME"
+
+crete_dot_rvm_file
+
+init_git
+
+# Copy this file and it's include files
+cp_genesis_files
+
+m="Setup and some Clean Up"
+msg "$m"
+
+# Kill spring if it is running
+ps -ef | grep "spring server" | awk '{print $2}' | xargs kill
+
+disable_Spring_in_gemfile
+
+git add -A;git commit -m"$m";echo ''
+
+bn="create_initial_models"
+let SEQ_NO+=1
+branch=$(printf %02d_%s ${SEQ_NO} ${bn})
+chg_to_git_branch $branch
+  m="Create Initial Models"
+  msg "$m"
+  rails g model category name:string
+  rails g scaffold product name:string 'price:decimal{8,2}' released_on:date category:references
+  git add -A;git commit -m"$m";echo ''
+merge_into_master $branch
+
+add_root_route
+
+# We are back on the Master Branch
+m="Bundle"
+msg "$m"
+bundle
+git add -A;git commit -m"$m";echo ''
+
+create_seeds_file
+
+m="Create and Migrate the db"
+msg "$m"
+rake db:create
+rake db:migrate
+rake db:test:prepare
+rake db:seed
+git add -A;git commit -m"$m";echo ''
+
+bn="update_product_views"
+let SEQ_NO+=1
+branch=$(printf %02d_%s ${SEQ_NO} ${bn})
+chg_to_git_branch $branch
+  m="Update Product Views"
+  msg "$m"
+  #  edit   NCR
+  #  new    NCR
+  update_application_html_erb
+  update_view_prod_index_html_erb
+  update_view_prod_show_html_erb
+  update_view_prod__form_html_erb
+
+  git add -A;git commit -m"$m";echo ''
+merge_into_master $branch
+
+# Add some simple styling
+bn="add_simple_styling"
+let SEQ_NO+=1
+branch=$(printf %02d_%s ${SEQ_NO} ${bn})
+chg_to_git_branch $branch
+  m="Add Simple Styling"
+  msg "$m"
+
+  add_simple_styling
+
+  git add -A;git commit -m"$m";echo ''
+merge_into_master $branch
+
+
+if $API_BUILD
+then
+  bn="build_api"
+  let SEQ_NO+=1
+  branch=$(printf %02d_%s ${SEQ_NO} ${bn})
+  chg_to_git_branch $branch
+    m="Build API for project"
+    msg "$m"
+
+    build_api
+
+    git add -A;git commit -m"$m";echo ''
+
+  merge_into_master $branch
+
+  # ------------------------------------------------------------
+  # At this point tthe API is reached like so:
+  #   http://localhost:3000/api/v1/products.json
+  #   http://localhost:3000/api/v2/products.json
+  #
+  # Need a new version due to Schema Change breaking V1
+  # So we will create a new Version and fix what we broke
+  # with the Schema change!
+  # ------------------------------------------------------------
+
+  bn="build_v2_api"
+  let SEQ_NO+=1
+  branch=$(printf %02d_%s ${SEQ_NO} ${bn})
+  chg_to_git_branch $branch
+    m="Cerate V2 of the API"
+    msg "$m"
+
+    build_api_v2
+    git add -A;git commit -m"$m";echo ''
+  merge_into_master $branch
+
+  # ------------------------------------------------------------
+  # Version Numbers
+  # Currently the version is in the URL path which is simple and
+  # direct but which isn’t considered a best practice by some.
+  #
+  # Instead of including the version number in the URL it’s passed
+  # in an Accept header.
+  # 1) Replace the namespaces in our routes with a call to scope.
+  #   This way we can specify what module to use and also the
+  #   constraints. The constraints logic can be rather complex so
+  #   move it into another class.
+  #
+  # At this point the API is reached like so:
+  #   curl -H 'Accept: application/vnd.example.v1' http://localhost:3000/api/products
+  #   curl -H 'Accept: application/vnd.example.v2' http://localhost:3000/api/products
+  # ------------------------------------------------------------
+
+  bn="build_version_into_accept_header"
+  let SEQ_NO+=1
+  branch=$(printf %02d_%s ${SEQ_NO} ${bn})
+  chg_to_git_branch $branch
+    m="Versioning via Accept header"
+    msg "$m"
+
+    cleanup_routes_file
+    replace_namespace_with_scope
+    define_api_constraints_class
+    add_api_constraints_to_routes_file
+
+    git add -A;git commit -m"$m";echo ''
+  merge_into_master $branch
+fi
+
+update_documentation
+# http://railscasts.com/episodes/350-rest-api-versioning?view=asciicast

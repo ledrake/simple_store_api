@@ -1,0 +1,28 @@
+#title           : Git Methods Lib
+#description     : This is intended to be used as an include file in a BASH
+#                  Script
+#author          : L. E. Drake
+#date            : 2015.04.08
+#version         : 0.0.0
+#usage           : . lib/GitMethods
+#bash_version    : GNU bash, version 4.3.11(1)-release (x86_64-pc-linux-gnu)
+#notes           :
+
+function init_git() {
+  local m="Initial commit"
+  msg "Initialize Git"
+  cmd "git init"
+  git add -A;git commit -m"$m";echo ''
+  # echo ''
+}
+
+function chg_to_git_branch() {
+  cmd "git co -b $1"
+}
+
+function merge_into_master() {
+  local branch_name="$1"
+  cmd "git co master"
+  cmd "git merge $branch_name"
+}
+
