@@ -1,13 +1,6 @@
 module Api
-  module V1
+  module V2
     class ProductsController < ApplicationController
-      # The field "released_on" is deprecated
-      class Product < ::Product
-        def as_json(options = {})
-          super.merge(released_on: released_at.to_date)
-        end
-      end
-
       respond_to :json
 
       def index
